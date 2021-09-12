@@ -33,6 +33,14 @@ jobs:
       # This is required separately from yarn test because it generates the typechain definitions
       - name: Compile
         run: yarn compile
+        env:
+          API_URL_KOVAN: ${{ secrets.API_URL_KOVAN }}
+          API_URL_ROPSTEN: ${{ secrets.API_URL_ROPSTEN }}
+          COINMARKETCAP_API_KEY: ${{ secrets.COINMARKETCAP_API_KEY }} 
 
       - name: Run unit tests
         run: yarn test
+        env:
+          API_URL_KOVAN: ${{ secrets.API_URL_KOVAN }}
+          API_URL_ROPSTEN: ${{ secrets.API_URL_ROPSTEN }}
+          COINMARKETCAP_API_KEY: ${{ secrets.COINMARKETCAP_API_KEY }} 
