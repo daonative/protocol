@@ -28,7 +28,6 @@ Using prologe.press smart contracts writers can:
 
 
 
-
 ## Roadmap
 
 1. release source code naive implentation of smart coontracts
@@ -44,13 +43,9 @@ Using prologe.press smart contracts writers can:
 Running test watchers:
 
 ```
-yarn test
+yarn
+cp .env.example .env
+# replace values of .env
+yarn test:watch
 ```
 
-##```
-
-## Resources
-
-TODO:
-
-- add hardhat gas reporter
