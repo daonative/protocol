@@ -36,11 +36,13 @@ jobs:
         env:
           API_URL_KOVAN: ${{ secrets.API_URL_KOVAN }}
           API_URL_ROPSTEN: ${{ secrets.API_URL_ROPSTEN }}
-          COINMARKETCAP_API_KEY: ${{ secrets.COINMARKETCAP_API_KEY }} 
+          COINMARKETCAP_API_KEY: ${{ secrets.COINMARKETCAP_API_KEY }}
+          TESTNET_PRIVATE_KEY: ${{ secrets.TESTNET_PRIVATE_KEY }}
 
       - name: Run unit tests
         run: yarn test
         env:
           API_URL_KOVAN: ${{ secrets.API_URL_KOVAN }}
           API_URL_ROPSTEN: ${{ secrets.API_URL_ROPSTEN }}
-          COINMARKETCAP_API_KEY: ${{ secrets.COINMARKETCAP_API_KEY }} 
+          COINMARKETCAP_API_KEY: ${{ secrets.COINMARKETCAP_API_KEY }}
+          TESTNET_PRIVATE_KEY: ${{ secrets.TESTNET_PRIVATE_KEY }}

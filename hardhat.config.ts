@@ -7,7 +7,8 @@ import 'hardhat-gas-reporter'
 import 'solidity-coverage'
 
 require('dotenv').config()
-const { API_URL_KOVAN, PRIVATE_KEY, API_URL_ROPSTEN } = process.env
+
+const { API_URL_KOVAN, KOVAN_TEST_PRIVATE_KEY } = process.env
 
 export default {
   watcher: {
@@ -21,15 +22,11 @@ export default {
     hardhat: {
       allowUnlimitedContractSize: false,
     },
-    ropsten: {
-      url: API_URL_ROPSTEN,
-      accounts: [`0x${PRIVATE_KEY}`],
+    kovan: {
+      url: API_URL_KOVAN,
+      accounts: [KOVAN_TEST_PRIVATE_KEY],
     },
-    rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    },
-    goerli: {
-      url: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
+  },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
