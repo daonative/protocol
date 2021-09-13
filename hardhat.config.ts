@@ -8,7 +8,7 @@ import 'solidity-coverage'
 
 require('dotenv').config()
 
-const { API_URL_KOVAN, KOVAN_TEST_PRIVATE_KEY } = process.env
+const { API_URL_KOVAN, TESTNET_PRIVATE_KEY } = process.env
 
 export default {
   watcher: {
@@ -24,7 +24,7 @@ export default {
     },
     kovan: {
       url: API_URL_KOVAN,
-      accounts: [KOVAN_TEST_PRIVATE_KEY],
+      accounts: [TESTNET_PRIVATE_KEY],
     },
   },
   etherscan: {
