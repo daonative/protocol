@@ -28,7 +28,8 @@ describe('sponsors should be able to create a bounty', () => {
     await expect(bountyCreator.createBounty(data)).to.emit(bountyCreator, 'BountyCreated')
     const [newBountyAddress] = await bountyCreator.getBounties()
     const Bounty = await ethers.getContractFactory('Bounty')
-    Bounty.attach(newBountyAddress)
+    const bounty = Bounty.attach(newBountyAddress)
+    expect(await bounty.getURI()).to.equal(data)
   })
   it('should be able to get existing bounties', async () => {
     const BountyCreator = await ethers.getContractFactory('BountyCreator')

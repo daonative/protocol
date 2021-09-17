@@ -27,7 +27,17 @@ contract Bounty {
 
     Article[] public articles;
 
-    constructor(address _creator, string memory _details) {}
+    string URI;
+    address creator;
+
+    constructor(address _creator, string memory _URI) {
+        creator = _creator;
+        URI = _URI;
+    }
+
+    function getURI() public view returns (string memory) {
+        return URI;
+    }
 
     function vote(bytes32 articleId, uint256 _amount) public {
         require(articleId.length > 0, 'articleId length should be higher than 0');

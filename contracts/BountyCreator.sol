@@ -6,8 +6,8 @@ contract BountyCreator {
     Bounty[] public createdBounties;
     event BountyCreated(Bounty indexed newBounty);
 
-    function createBounty(string memory _details) external payable returns (Bounty) {
-        Bounty newBounty = new Bounty(msg.sender, _details);
+    function createBounty(string memory _URI) external payable returns (Bounty) {
+        Bounty newBounty = new Bounty(msg.sender, _URI);
 
         createdBounties.push(newBounty);
         emit BountyCreated(newBounty);
