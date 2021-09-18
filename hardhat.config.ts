@@ -8,7 +8,7 @@ import 'solidity-coverage'
 
 require('dotenv').config()
 
-const { API_URL_KOVAN, TESTNET_PRIVATE_KEY } = process.env
+const { API_URL_KOVAN, API_URL_ROPSTEN, TESTNET_PRIVATE_KEY } = process.env
 
 export default {
   watcher: {
@@ -21,6 +21,11 @@ export default {
   networks: {
     hardhat: {
       allowUnlimitedContractSize: false,
+    },
+
+    ropsten: {
+      url: API_URL_ROPSTEN,
+      accounts: [TESTNET_PRIVATE_KEY],
     },
     kovan: {
       url: API_URL_KOVAN,
