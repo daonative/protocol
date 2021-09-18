@@ -65,6 +65,7 @@ contract Bounty {
     }
 
     function deposit() external payable {
+        require(msg.value > 0, 'amount should be non null');
         balances[msg.sender] += msg.value;
         emit Transfer(msg.sender, address(this), msg.value);
     }
@@ -72,6 +73,7 @@ contract Bounty {
     function withdraw(uint256 _amount) external {
         require(_amount <= balances[msg.sender], 'withdrawal _amount cannot be higher than sender balance');
         (bool success, ) = msg.sender.call{value: _amount}('');
+        balances[msg.sender] -= _amount;
         require(success, 'Transfer failed.');
 
         emit Transfer(address(this), msg.sender, _amount);

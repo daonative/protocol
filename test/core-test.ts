@@ -71,6 +71,8 @@ describe('sponsors should be able to create a bounty', () => {
     await expect(bounty.withdraw(fundingAmount))
       .to.emit(bounty, 'Transfer')
       .withArgs(bounty.address, owner.address, fundingAmount)
+
+    expect(await bounty.getDeposit()).to.be.equal(0)
   })
 })
 describe('writers should be able to submit an answer', () => {
