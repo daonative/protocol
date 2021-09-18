@@ -3,13 +3,14 @@ import { solidity } from 'ethereum-waffle'
 import { jestSnapshotPlugin } from 'mocha-chai-jest-snapshot'
 import { ethers, waffle } from 'hardhat'
 import { parseEther } from '@ethersproject/units'
+import { BigNumber } from '@ethersproject/bignumber'
 
 use(solidity)
 use(jestSnapshotPlugin())
 
 const data = 'weopuwierpoiewuqwpwioeru'
 
-const fundingAmount = parseEther('0.2')
+const fundingAmount = parseEther('2')
 const uriLink = 'https://link.co.test'
 
 // used to keep track of the Bounty Contract gas cost
@@ -106,10 +107,10 @@ describe('sponsors should be able to vote on answers', () => {
     const answers = await bountyWriter.getAnswers()
 
     // voting round
-    await expect(bounty.vote(answers[0].id, fundingAmount))
-      .to.emit(bounty, 'Vote')
-      .withArgs(fundingAmount, answers[0].id)
-    expect(await bountyWriter.getDeposit()).to.equal(fundingAmount)
+    const votingAmount = parseEther('0.5')
+    await expect(bounty.vote(answers[0].id, votingAmount)).to.emit(bounty, 'Vote').withArgs(votingAmount, answers[0].id)
+    expect(await bounty.getDeposit()).to.equal(fundingAmount.sub(votingAmount))
+    expect(await bountyWriter.getDeposit()).to.equal(votingAmount)
   })
 })
 describe('writers should be able to claim rewards', () => {
@@ -128,5 +129,4 @@ describe('writers should be able to claim rewards', () => {
     await bountyWriter.withdraw(fundingAmount)
   })
 })
-
 describe('sponsors should be able to add funds to an existing call for article', async () => {})

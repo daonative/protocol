@@ -43,6 +43,7 @@ contract Bounty {
         require(articleId.length > 0, 'articleId length should be higher than 0');
         require(_amount <= balances[msg.sender], 'vote amount should not be higher than sender balance');
         address writerAddress = articleToWriter[articleId];
+        balances[msg.sender] -= _amount;
         balances[writerAddress] += _amount;
         emit Vote(_amount, articleId);
     }
