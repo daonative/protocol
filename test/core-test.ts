@@ -13,6 +13,8 @@ const data = 'weopuwierpoiewuqwpwioeru'
 const fundingAmount = parseEther('2')
 const uriLink = 'https://link.co.test'
 
+const proposalAmountRequested = parseEther('0.1')
+
 // used to keep track of the Room Contract gas cost
 describe('Room Contract', () => {
   it('should deploy the contract', async () => {
@@ -76,25 +78,25 @@ describe('sponsors should be able to create a room', () => {
     expect(await room.getDeposit()).to.be.equal(0)
   })
 })
-describe('contributors should be able to submit an proposal', () => {
-  it('should be able to submit an proposal', async () => {
+describe('contributors should be able to submit a proposal', () => {
+  it('should be able to submit a proposal', async () => {
     const [owner] = await ethers.getSigners()
     const Room = await ethers.getContractFactory('Room')
     const room = await Room.deploy(owner.address, data)
-    await expect(room.submitProposal(uriLink)).to.emit(room, 'SubmitProposal')
+    await expect(room.submitProposal(uriLink, proposalAmountRequested)).to.emit(room, 'SubmitProposal')
   })
   it('should be able to retrieve own proposals', async () => {
     const [owner] = await ethers.getSigners()
     const Room = await ethers.getContractFactory('Room')
     const room = await Room.deploy(owner.address, data)
-    room.submitProposal(uriLink)
+    room.submitProposal(uriLink, proposalAmountRequested)
     const proposals = await room.getMyProposals()
     expect(proposals[0]).to.equal(uriLink)
   })
 })
 
-describe('sponsors should be able to vote on proposals', () => {
-  it('should be able to vote on proposal', async () => {
+describe('sponsors should be able to approve proposals', () => {
+  it('should be able to approve a proposal', async () => {
     const [roomOwnerSigner, roomContributorSigner] = await ethers.getSigners()
     // funding round
     const Room = await ethers.getContractFactory('Room')
@@ -103,14 +105,15 @@ describe('sponsors should be able to vote on proposals', () => {
 
     // response round
     const roomContributor = new ethers.Contract(room.address, Room.interface, roomContributorSigner)
-    roomContributor.submitProposal(uriLink)
+    roomContributor.submitProposal(uriLink, proposalAmountRequested)
     const proposals = await roomContributor.getProposals()
 
     // voting round
-    const votingAmount = parseEther('0.5')
-    await expect(room.vote(proposals[0].id, votingAmount)).to.emit(room, 'Vote').withArgs(votingAmount, proposals[0].id)
-    expect(await room.getDeposit()).to.equal(fundingAmount.sub(votingAmount))
-    expect(await roomContributor.getDeposit()).to.equal(votingAmount)
+    await expect(room.fundProposal(proposals[0].id))
+      .to.emit(room, 'Fund')
+      .withArgs(proposalAmountRequested, proposals[0].id)
+    expect(await room.getDeposit()).to.equal(fundingAmount.sub(proposalAmountRequested))
+    expect(await roomContributor.getDeposit()).to.equal(proposalAmountRequested)
   })
 })
 describe('contributors should be able to claim rewards', () => {
@@ -123,9 +126,9 @@ describe('contributors should be able to claim rewards', () => {
 
     // this is for a contributor
     const roomContributor = new ethers.Contract(room.address, Room.interface, roomContributorSigner)
-    roomContributor.submitProposal(uriLink)
+    roomContributor.submitProposal(uriLink, proposalAmountRequested)
     const proposals = await roomContributor.getProposals()
-    await room.vote(proposals[0].id, fundingAmount)
-    await roomContributor.withdraw(fundingAmount)
+    await room.fundProposal(proposals[0].id)
+    await roomContributor.withdraw(proposalAmountRequested)
   })
 })

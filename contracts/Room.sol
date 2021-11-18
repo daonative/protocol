@@ -6,12 +6,12 @@ contract Room {
         bytes32 id;
         address creator;
         string uri;
+        uint256 amount;
     }
 
     event Transfer(address indexed from, address indexed to, uint256 value);
-
     event SubmitProposal(Proposal proposal);
-    event Vote(uint256 amount, bytes32 proposalId);
+    event Fund(uint256 amount, bytes32 proposalId);
     uint256 randNonce = 0;
 
     function rand() internal returns (bytes32) {
@@ -25,7 +25,9 @@ contract Room {
 
     mapping(bytes32 => address) public proposalToContributor;
 
-    Proposal[] public proposals;
+    mapping(bytes32 => Proposal) public proposals;
+
+    Proposal[] public allProposals;
 
     string URI;
     address creator;
@@ -39,22 +41,25 @@ contract Room {
         return URI;
     }
 
-    function vote(bytes32 proposalId, uint256 _amount) public {
+    function fundProposal(bytes32 proposalId) public {
         require(proposalId.length > 0, 'proposalId length should be higher than 0');
-        require(_amount <= balances[msg.sender], 'vote amount should not be higher than sender balance');
+        uint256 amount = proposals[proposalId].amount;
+        require(amount <= balances[msg.sender], 'msg.sender blance too low');
         address contributorAddress = proposalToContributor[proposalId];
-        balances[msg.sender] -= _amount;
-        balances[contributorAddress] += _amount;
-        emit Vote(_amount, proposalId);
+        balances[msg.sender] -= amount;
+        balances[contributorAddress] += amount;
+        emit Fund(amount, proposalId);
     }
 
-    function submitProposal(string memory _uri) public {
+    function submitProposal(string memory _uri, uint256 _amount) public {
+        require(_amount > 0, '_amount should be higher than 0');
         require(bytes(_uri).length > 0, '_uri must not be empty');
         bytes32 proposalId = rand();
-        proposals.push(Proposal(proposalId, msg.sender, _uri));
+        allProposals.push(Proposal(proposalId, msg.sender, _uri, _amount));
+        proposals[proposalId] = Proposal(proposalId, msg.sender, _uri, _amount);
         contributorProposals[msg.sender].push(_uri);
         proposalToContributor[proposalId] = msg.sender;
-        emit SubmitProposal(Proposal(proposalId, msg.sender, _uri));
+        emit SubmitProposal(Proposal(proposalId, msg.sender, _uri, _amount));
     }
 
     function getMyProposals() public view returns (string[] memory) {
@@ -62,7 +67,7 @@ contract Room {
     }
 
     function getProposals() public view returns (Proposal[] memory) {
-        return proposals;
+        return allProposals;
     }
 
     function deposit() external payable {
