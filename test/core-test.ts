@@ -32,14 +32,14 @@ describe('sponsors should be able to create a room', () => {
     const room = Room.attach(newRoomAddress)
     expect(await room.getURI()).to.equal(data)
   })
-  it('should be able to get existing bounties', async () => {
+  it('should be able to get existing rooms', async () => {
     const RoomCreator = await ethers.getContractFactory('RoomCreator')
     const roomCreator = await RoomCreator.deploy()
-    const bountiesBefore = await roomCreator.getBounties()
-    expect(bountiesBefore.length).to.equal(0)
+    const roomsBefore = await roomCreator.getBounties()
+    expect(roomsBefore.length).to.equal(0)
     await roomCreator.createRoom(data)
-    const bountiesAfter = await roomCreator.getBounties()
-    expect(bountiesAfter.length).to.equal(1)
+    const roomsAfter = await roomCreator.getBounties()
+    expect(roomsAfter.length).to.equal(1)
   })
 
   it('should be able to deposit eth on room', async () => {
