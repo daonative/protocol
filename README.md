@@ -1,6 +1,5 @@
 # smart contracts | prologe.press
 
-
 Welcome to the prologe.press smart contracts repo
 
 Right now we just released a naive implementation of how the contracts will work. But, we plan on reducing the costs of deploying.
@@ -8,25 +7,29 @@ Right now we just released a naive implementation of how the contracts will work
 ## Warning
 
 This is still an alpha version which will evolve significantly before the mainnet release.
+
 ## Terminology
 
-- Call for article: a way to request content on-chain
-- Article: for the smart contracts articles are a link
+- room: a treasury to help you fund content
+- proposal: a way to request funds from your treasury
+
+## Roles
+
+- contributor: someone making a proposal for content
+- sponsor: someone funding a Newsroom
+
 ## Introduction
 
+Using newsroom contracts, sponsors can:
 
-Using prologe.press smart contracts sponsor can:
+- Create a newsroom & fund it
+- Create proposals to request funds from your newsroom
+- Fund proposals
 
-- create a new call
-- fund a call
-- vote on articles
+Using newsroom contracts, contributors can:
 
-Using prologe.press smart contracts writers can:
-
-- submit an article
-- withdraw their rewards
-
-
+- Submit an proposal
+- Withdraw their rewards
 
 ## Roadmap
 
@@ -48,4 +51,3 @@ cp .env.example .env
 # replace values of .env
 yarn test:watch
 ```
-

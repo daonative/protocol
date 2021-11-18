@@ -76,57 +76,56 @@ describe('sponsors should be able to create a room', () => {
     expect(await room.getDeposit()).to.be.equal(0)
   })
 })
-describe('writers should be able to submit an answer', () => {
-  it('should be able to submit an article', async () => {
+describe('contributors should be able to submit an proposal', () => {
+  it('should be able to submit an proposal', async () => {
     const [owner] = await ethers.getSigners()
     const Room = await ethers.getContractFactory('Room')
     const room = await Room.deploy(owner.address, data)
-    await expect(room.submitAnswer(uriLink)).to.emit(room, 'SubmitAnswer')
+    await expect(room.submitProposal(uriLink)).to.emit(room, 'SubmitProposal')
   })
-  it('should be able to retrieve own answers', async () => {
+  it('should be able to retrieve own proposals', async () => {
     const [owner] = await ethers.getSigners()
     const Room = await ethers.getContractFactory('Room')
     const room = await Room.deploy(owner.address, data)
-    room.submitAnswer(uriLink)
-    const answers = await room.getMyAnswers()
-    expect(answers[0]).to.equal(uriLink)
+    room.submitProposal(uriLink)
+    const proposals = await room.getMyProposals()
+    expect(proposals[0]).to.equal(uriLink)
   })
 })
 
-describe('sponsors should be able to vote on answers', () => {
-  it('should be able to vote on answer', async () => {
-    const [roomOwnerSigner, roomWriterSigner] = await ethers.getSigners()
+describe('sponsors should be able to vote on proposals', () => {
+  it('should be able to vote on proposal', async () => {
+    const [roomOwnerSigner, roomContributorSigner] = await ethers.getSigners()
     // funding round
     const Room = await ethers.getContractFactory('Room')
     const room = await Room.deploy(roomOwnerSigner.address, data)
     await room.deposit({ value: fundingAmount })
 
     // response round
-    const roomWriter = new ethers.Contract(room.address, Room.interface, roomWriterSigner)
-    roomWriter.submitAnswer(uriLink)
-    const answers = await roomWriter.getAnswers()
+    const roomContributor = new ethers.Contract(room.address, Room.interface, roomContributorSigner)
+    roomContributor.submitProposal(uriLink)
+    const proposals = await roomContributor.getProposals()
 
     // voting round
     const votingAmount = parseEther('0.5')
-    await expect(room.vote(answers[0].id, votingAmount)).to.emit(room, 'Vote').withArgs(votingAmount, answers[0].id)
+    await expect(room.vote(proposals[0].id, votingAmount)).to.emit(room, 'Vote').withArgs(votingAmount, proposals[0].id)
     expect(await room.getDeposit()).to.equal(fundingAmount.sub(votingAmount))
-    expect(await roomWriter.getDeposit()).to.equal(votingAmount)
+    expect(await roomContributor.getDeposit()).to.equal(votingAmount)
   })
 })
-describe('writers should be able to claim rewards', () => {
+describe('contributors should be able to claim rewards', () => {
   it('should be able to withdraw funds', async () => {
-    const [roomOwnerSigner, roomWriterSigner] = await ethers.getSigners()
+    const [roomOwnerSigner, roomContributorSigner] = await ethers.getSigners()
     // this is for the creator of the coontract
     const Room = await ethers.getContractFactory('Room')
     const room = await Room.deploy(roomOwnerSigner.address, data)
     await room.deposit({ value: fundingAmount })
 
-    // this is for a writer
-    const roomWriter = new ethers.Contract(room.address, Room.interface, roomWriterSigner)
-    roomWriter.submitAnswer(uriLink)
-    const answers = await roomWriter.getAnswers()
-    await room.vote(answers[0].id, fundingAmount)
-    await roomWriter.withdraw(fundingAmount)
+    // this is for a contributor
+    const roomContributor = new ethers.Contract(room.address, Room.interface, roomContributorSigner)
+    roomContributor.submitProposal(uriLink)
+    const proposals = await roomContributor.getProposals()
+    await room.vote(proposals[0].id, fundingAmount)
+    await roomContributor.withdraw(fundingAmount)
   })
 })
-describe('sponsors should be able to add funds to an existing call for article', async () => {})

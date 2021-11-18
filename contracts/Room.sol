@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 contract Room {
-    struct Article {
+    struct Proposal {
         bytes32 id;
         address creator;
         string uri;
@@ -10,8 +10,8 @@ contract Room {
 
     event Transfer(address indexed from, address indexed to, uint256 value);
 
-    event SubmitAnswer(Article article);
-    event Vote(uint256 amount, bytes32 articleId);
+    event SubmitProposal(Proposal proposal);
+    event Vote(uint256 amount, bytes32 proposalId);
     uint256 randNonce = 0;
 
     function rand() internal returns (bytes32) {
@@ -21,11 +21,11 @@ contract Room {
 
     mapping(address => uint256) public balances;
 
-    mapping(address => string[]) public writerArticles;
+    mapping(address => string[]) public contributorProposals;
 
-    mapping(bytes32 => address) public articleToWriter;
+    mapping(bytes32 => address) public proposalToContributor;
 
-    Article[] public articles;
+    Proposal[] public proposals;
 
     string URI;
     address creator;
@@ -39,30 +39,30 @@ contract Room {
         return URI;
     }
 
-    function vote(bytes32 articleId, uint256 _amount) public {
-        require(articleId.length > 0, 'articleId length should be higher than 0');
+    function vote(bytes32 proposalId, uint256 _amount) public {
+        require(proposalId.length > 0, 'proposalId length should be higher than 0');
         require(_amount <= balances[msg.sender], 'vote amount should not be higher than sender balance');
-        address writerAddress = articleToWriter[articleId];
+        address contributorAddress = proposalToContributor[proposalId];
         balances[msg.sender] -= _amount;
-        balances[writerAddress] += _amount;
-        emit Vote(_amount, articleId);
+        balances[contributorAddress] += _amount;
+        emit Vote(_amount, proposalId);
     }
 
-    function submitAnswer(string memory _uri) public {
+    function submitProposal(string memory _uri) public {
         require(bytes(_uri).length > 0, '_uri must not be empty');
-        bytes32 articleId = rand();
-        articles.push(Article(articleId, msg.sender, _uri));
-        writerArticles[msg.sender].push(_uri);
-        articleToWriter[articleId] = msg.sender;
-        emit SubmitAnswer(Article(articleId, msg.sender, _uri));
+        bytes32 proposalId = rand();
+        proposals.push(Proposal(proposalId, msg.sender, _uri));
+        contributorProposals[msg.sender].push(_uri);
+        proposalToContributor[proposalId] = msg.sender;
+        emit SubmitProposal(Proposal(proposalId, msg.sender, _uri));
     }
 
-    function getMyAnswers() public view returns (string[] memory) {
-        return writerArticles[msg.sender];
+    function getMyProposals() public view returns (string[] memory) {
+        return contributorProposals[msg.sender];
     }
 
-    function getAnswers() public view returns (Article[] memory) {
-        return articles;
+    function getProposals() public view returns (Proposal[] memory) {
+        return proposals;
     }
 
     function deposit() external payable {
