@@ -2,10 +2,10 @@ const ethers = require('hardhat').ethers
 
 async function main() {
   // We get the contract to deploy
-  const BountyCreator = await ethers.getContractFactory('BountyCreator')
-  const bountyCreator = await BountyCreator.deploy()
+  const RoomCreator = await ethers.getContractFactory('RoomCreator')
+  const roomCreator = await RoomCreator.deploy()
 
-  console.log('BountyCreator deployed to:', bountyCreator.address)
+  console.log('RoomCreator deployed to:', roomCreator.address)
 }
 
 main()
