@@ -30,11 +30,11 @@ export default {
 
     ropsten: {
       url: API_URL_ROPSTEN,
-      accounts: [PRIVATE_KEY],
+      accounts: [`0x${PRIVATE_KEY}`],
     },
     kovan: {
       url: API_URL_KOVAN,
-      accounts: [PRIVATE_KEY],
+      accounts: [`0x${PRIVATE_KEY}`],
     },
   },
   etherscan: {

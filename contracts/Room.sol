@@ -2,16 +2,24 @@
 pragma solidity ^0.8.0;
 
 contract Room {
+    enum State {
+        PENDING,
+        APPROVED,
+        REJECTED
+    }
+
     struct Proposal {
         bytes32 id;
         address creator;
         string uri;
         uint256 amount;
+        State state;
     }
 
     event Transfer(address indexed from, address indexed to, uint256 value);
     event SubmitProposal(Proposal proposal);
-    event Fund(uint256 amount, bytes32 proposalId);
+    event Approve(uint256 amount, bytes32 proposalId);
+    event Reject(bytes32 proposalId);
     uint256 randNonce = 0;
 
     function rand() internal returns (bytes32) {
@@ -21,7 +29,7 @@ contract Room {
 
     mapping(address => uint256) public balances;
 
-    mapping(address => string[]) public contributorProposals;
+    mapping(address => bytes32[]) public contributorProposals;
 
     mapping(bytes32 => address) public proposalToContributor;
 
@@ -41,28 +49,43 @@ contract Room {
         return URI;
     }
 
-    function fundProposal(bytes32 proposalId) public {
+    function approveProposal(bytes32 proposalId) public {
         require(proposalId.length > 0, 'proposalId length should be higher than 0');
+        Proposal memory proposal = proposals[proposalId];
+        require(proposal.state == State.PENDING, 'Only PENDING proposals can be approved');
         uint256 amount = proposals[proposalId].amount;
         require(amount <= balances[msg.sender], 'msg.sender blance too low');
         address contributorAddress = proposalToContributor[proposalId];
         balances[msg.sender] -= amount;
         balances[contributorAddress] += amount;
-        emit Fund(amount, proposalId);
+        proposals[proposalId].state = State.APPROVED;
+        emit Approve(amount, proposalId);
+    }
+
+    function rejectProposal(bytes32 proposalId) public {
+        require(proposalId.length > 0, 'proposalId length should be higher than 0');
+        Proposal memory proposal = proposals[proposalId];
+        require(proposal.state == State.PENDING, 'Only PENDING proposals can be approved');
+        proposals[proposalId].state = State.REJECTED;
+        emit Reject(proposalId);
     }
 
     function submitProposal(string memory _uri, uint256 _amount) public {
         require(_amount > 0, '_amount should be higher than 0');
         require(bytes(_uri).length > 0, '_uri must not be empty');
         bytes32 proposalId = rand();
-        allProposals.push(Proposal(proposalId, msg.sender, _uri, _amount));
-        proposals[proposalId] = Proposal(proposalId, msg.sender, _uri, _amount);
-        contributorProposals[msg.sender].push(_uri);
+        allProposals.push(Proposal(proposalId, msg.sender, _uri, _amount, State.PENDING));
+        proposals[proposalId] = Proposal(proposalId, msg.sender, _uri, _amount, State.PENDING);
+        contributorProposals[msg.sender].push(proposalId);
         proposalToContributor[proposalId] = msg.sender;
-        emit SubmitProposal(Proposal(proposalId, msg.sender, _uri, _amount));
+        emit SubmitProposal(Proposal(proposalId, msg.sender, _uri, _amount, State.PENDING));
     }
 
-    function getMyProposals() public view returns (string[] memory) {
+    function getProposal(bytes32 _proposalId) public view returns (Proposal memory) {
+        return proposals[_proposalId];
+    }
+
+    function getMyProposals() public view returns (bytes32[] memory) {
         return contributorProposals[msg.sender];
     }
 
