@@ -24,6 +24,17 @@ describe('Room Contract', () => {
   })
 })
 
+describe('Contract creator should be able to withdraw all funds', () => {
+  it('should only allow the creator to make emergency withdrawals', async () => {
+    const [roomOwnerSigner, roomContributorSigner] = await ethers.getSigners()
+    // funding round
+    const Room = await ethers.getContractFactory('Room')
+    const room = await Room.deploy(roomOwnerSigner.address, data)
+    await room.deposit({ value: fundingAmount })
+
+    await expect(room.emergencyWithdrawal()).to.emit(room, 'Transfer')
+  })
+})
 describe('sponsors should be able to create a room', () => {
   it('should create a room', async () => {
     const RoomCreator = await ethers.getContractFactory('RoomCreator')
@@ -148,9 +159,9 @@ describe('sponsors should be able to approve proposals', () => {
     const proposals = await roomContributor.getProposals()
 
     // approval round
-    await expect(room.approveProposal(proposals[0].id))
+    await expect(room.approveProposal(proposals[0]))
       .to.emit(room, 'Approve')
-      .withArgs(proposalAmountRequested, proposals[0].id)
+      .withArgs(proposalAmountRequested, proposals[0])
     expect(await room.getDeposit()).to.equal(fundingAmount.sub(proposalAmountRequested))
     expect(await roomContributor.getDeposit()).to.equal(proposalAmountRequested)
   })
@@ -167,7 +178,7 @@ describe('contributors should be able to claim rewards', () => {
     const roomContributor = new ethers.Contract(room.address, Room.interface, roomContributorSigner)
     roomContributor.submitProposal(uriLink, proposalAmountRequested)
     const proposals = await roomContributor.getProposals()
-    await room.approveProposal(proposals[0].id)
+    await room.approveProposal(proposals[0])
     await roomContributor.withdraw(proposalAmountRequested)
   })
 })

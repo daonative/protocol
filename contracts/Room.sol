@@ -35,9 +35,10 @@ contract Room {
 
     mapping(bytes32 => Proposal) public proposals;
 
-    Proposal[] public allProposals;
+    bytes32[] public allProposals;
 
     string URI;
+
     address creator;
 
     constructor(address _creator, string memory _URI) {
@@ -74,7 +75,7 @@ contract Room {
         require(_amount > 0, '_amount should be higher than 0');
         require(bytes(_uri).length > 0, '_uri must not be empty');
         bytes32 proposalId = rand();
-        allProposals.push(Proposal(proposalId, msg.sender, _uri, _amount, State.PENDING));
+        allProposals.push(proposalId);
         proposals[proposalId] = Proposal(proposalId, msg.sender, _uri, _amount, State.PENDING);
         contributorProposals[msg.sender].push(proposalId);
         proposalToContributor[proposalId] = msg.sender;
@@ -89,7 +90,7 @@ contract Room {
         return contributorProposals[msg.sender];
     }
 
-    function getProposals() public view returns (Proposal[] memory) {
+    function getProposals() public view returns (bytes32[] memory) {
         return allProposals;
     }
 
@@ -110,5 +111,13 @@ contract Room {
 
     function getDeposit() external view returns (uint256) {
         return balances[msg.sender];
+    }
+
+    function emergencyWithdrawal() public {
+        require(msg.sender == creator, 'only the room creator can withdraw');
+        uint256 amount = address(this).balance;
+        (bool success, ) = msg.sender.call{value: amount}('');
+        require(success, 'Transfer failed.');
+        emit Transfer(address(this), msg.sender, amount);
     }
 }
