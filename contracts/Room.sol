@@ -54,13 +54,12 @@ contract Room {
         require(proposalId.length > 0, 'proposalId length should be higher than 0');
         Proposal memory proposal = proposals[proposalId];
         require(proposal.state == State.PENDING, 'Only PENDING proposals can be approved');
-        uint256 amount = proposals[proposalId].amount;
-        require(amount <= balances[msg.sender], 'msg.sender blance too low');
+        require(proposal.amount <= balances[msg.sender], 'msg.sender blance too low');
         address contributorAddress = proposalToContributor[proposalId];
-        balances[msg.sender] -= amount;
-        balances[contributorAddress] += amount;
+        balances[msg.sender] -= proposal.amount;
+        balances[contributorAddress] += proposal.amount;
         proposals[proposalId].state = State.APPROVED;
-        emit Approve(amount, proposalId);
+        emit Approve(proposal.amount, proposalId);
     }
 
     function rejectProposal(bytes32 proposalId) public {
