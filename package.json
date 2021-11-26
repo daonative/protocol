@@ -43,6 +43,7 @@
     "test": "hardhat test",
     "deploy:ropsten": "hardhat run --network ropsten  scripts/deploy.js",
     "deploy:kovan": "hardhat run --network kovan  scripts/deploy.js",
+    "deploy:polygon": "hardhat run --network matic scripts/deploy.js",
     "test:watch": "hardhat watch test"
   }
 }
