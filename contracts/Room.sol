@@ -63,6 +63,7 @@ contract Room {
     }
 
     function rejectProposal(bytes32 proposalId) public {
+        require(msg.sender == creator, 'only the room creator can reject a proposal');
         require(proposalId.length > 0, 'proposalId length should be higher than 0');
         Proposal memory proposal = proposals[proposalId];
         require(proposal.state == State.PENDING, 'Only PENDING proposals can be approved');
