@@ -8,7 +8,7 @@ import 'solidity-coverage'
 
 require('dotenv').config()
 
-const { API_URL_KOVAN, API_URL_ROPSTEN, PRIVATE_KEY } = process.env
+const { API_URL_KOVAN, API_URL_ROPSTEN, TEST_PRIVATE_KEY } = process.env
 
 export default {
   watcher: {
@@ -30,11 +30,15 @@ export default {
 
     ropsten: {
       url: API_URL_ROPSTEN,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [`0x${TEST_PRIVATE_KEY}`],
     },
     kovan: {
       url: API_URL_KOVAN,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [`0x${TEST_PRIVATE_KEY}`],
+    },
+    matic: {
+      url: 'https://rpc-mumbai.maticvigil.com',
+      accounts: [process.env.PRIVATE_KEY],
     },
   },
   etherscan: {
