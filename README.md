@@ -1,6 +1,6 @@
-# smart contracts | prologe.press
+# Newsroom Treasury protocol
 
-Welcome to the prologe.press smart contracts repo
+Welcome to the Newsroom Treasury repo
 
 Right now we just released a naive implementation of how the contracts will work. But, we plan on reducing the costs of deploying.
 
@@ -17,6 +17,7 @@ This is still an alpha version which will evolve significantly before the mainne
 
 - contributor: someone making a proposal for content
 - sponsor: someone funding a Newsroom
+- creator: msg.sender that created the treasury
 
 ## Introduction
 
