@@ -30,12 +30,5 @@ describe('Ability to mint an NFT', () => {
     const roomMembershipWithMemberOne = new ethers.Contract(roomMembership.address, roomMembership.interface, owner)
     roomMembershipWithMemberOne.safeMint(owner.address, 'test')
   })
-  it('should NOT be possible for anyone to mint an NFT', async () => {
-    const RoomMembership = await ethers.getContractFactory('RoomMembership')
-    const roomMembership = await RoomMembership.deploy()
-    const [owner, memberOne, memberTwo, memberThree] = await ethers.getSigners()
-    const roomMembershipWithMemberOne = new ethers.Contract(roomMembership.address, roomMembership.interface, memberOne)
-    roomMembershipWithMemberOne.safeMint(memberOne.address, 'test')
-  })
 })
 describe('Ability to adjust price based on counter', () => {})
