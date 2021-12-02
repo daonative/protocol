@@ -37,7 +37,7 @@ export default {
       accounts: [`0x${TEST_PRIVATE_KEY}`],
     },
     matic: {
-      url: 'https://rpc-mumbai.maticvigil.com',
+      url: 'https://polygon-mainnet.g.alchemy.com/v2/NEz6QL2p7xBWqTwmZF5nCCF8PL-zTE4O',
       accounts: [process.env.PRIVATE_KEY || '0x000000000000'],
     },
   },
