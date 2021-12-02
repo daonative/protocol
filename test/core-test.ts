@@ -106,7 +106,7 @@ describe('contributors should be able to submit a proposal', () => {
 })
 
 describe('sponsors should be able to approve proposals', () => {
-  it('should be able to transition from pending to rejected', async () => {
+  it('should be possible for the creator of the room mark the task as delivered', async () => {
     const [roomOwnerSigner, roomContributorSigner] = await ethers.getSigners()
     // funding round
     const Room = await ethers.getContractFactory('Room')
@@ -121,9 +121,34 @@ describe('sponsors should be able to approve proposals', () => {
 
     // approval round
     expect(await proposalBefore.state).to.be.eq(0)
+    await room.approveProposal(proposalBefore.id)
+    await roomContributor.getProposal(proposalList[0])
+
+    // closing round
+    expect(await proposalBefore.state).to.be.eq(0)
+    await room.closeProposal(proposalBefore.id)
+    const proposalAfter = await roomContributor.getProposal(proposalList[0])
+
+    expect(await proposalAfter.state).to.be.eq(2)
+  })
+  it('should be able to transition from pending to rejected', async () => {
+    const [roomOwnerSigner, roomContributorSigner] = await ethers.getSigners()
+    // funding round
+    const Room = await ethers.getContractFactory('Room')
+    const room = await Room.deploy(roomOwnerSigner.address, data)
+    await room.deposit({ value: fundingAmount })
+
+    // submission
+    const roomContributor = new ethers.Contract(room.address, Room.interface, roomContributorSigner)
+    roomContributor.submitProposal(uriLink, proposalAmountRequested)
+    const proposalList = await roomContributor.getMyProposals()
+    const proposalBefore = await roomContributor.getProposal(proposalList[0])
+
+    // rejection
+    expect(await proposalBefore.state).to.be.eq(0)
     await room.rejectProposal(proposalBefore.id)
     const proposalAfter = await roomContributor.getProposal(proposalList[0])
-    expect(await proposalAfter.state).to.be.eq(2)
+    expect(await proposalAfter.state).to.be.eq(3)
   })
   it('should be able to transition from pending to approved', async () => {
     const [roomOwnerSigner, roomContributorSigner] = await ethers.getSigners()

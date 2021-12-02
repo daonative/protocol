@@ -5,6 +5,7 @@ contract Room {
     enum State {
         PENDING,
         APPROVED,
+        CLOSED,
         REJECTED
     }
 
@@ -20,6 +21,8 @@ contract Room {
     event SubmitProposal(Proposal proposal);
     event Approve(uint256 amount, bytes32 proposalId);
     event Reject(bytes32 proposalId);
+    event Close(bytes32 proposalId);
+
     uint256 randNonce = 0;
 
     function rand() internal returns (bytes32) {
@@ -50,6 +53,13 @@ contract Room {
         return URI;
     }
 
+    function closeProposal(bytes32 proposalId) public {
+        require(proposalId.length > 0, 'proposalId length should be higher than 0');
+        require(proposals[proposalId].state == State.APPROVED, 'Only APPROVED proposals can be closed');
+        proposals[proposalId].state = State.CLOSED;
+        emit Close(proposalId);
+    }
+
     function approveProposal(bytes32 proposalId) public {
         require(proposalId.length > 0, 'proposalId length should be higher than 0');
         Proposal memory proposal = proposals[proposalId];
@@ -65,8 +75,7 @@ contract Room {
     function rejectProposal(bytes32 proposalId) public {
         require(msg.sender == creator, 'only the room creator can reject a proposal');
         require(proposalId.length > 0, 'proposalId length should be higher than 0');
-        Proposal memory proposal = proposals[proposalId];
-        require(proposal.state == State.PENDING, 'Only PENDING proposals can be approved');
+        require(proposals[proposalId].state == State.PENDING, 'Only PENDING proposals can be approved');
         proposals[proposalId].state = State.REJECTED;
         emit Reject(proposalId);
     }
@@ -79,7 +88,7 @@ contract Room {
         proposals[proposalId] = Proposal(proposalId, msg.sender, _uri, _amount, State.PENDING);
         contributorProposals[msg.sender].push(proposalId);
         proposalToContributor[proposalId] = msg.sender;
-        emit SubmitProposal(Proposal(proposalId, msg.sender, _uri, _amount, State.PENDING));
+        emit SubmitProposal(proposals[proposalId]);
     }
 
     function getProposal(bytes32 _proposalId) public view returns (Proposal memory) {
