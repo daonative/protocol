@@ -3,7 +3,6 @@ import { solidity } from 'ethereum-waffle'
 import { jestSnapshotPlugin } from 'mocha-chai-jest-snapshot'
 import { ethers, waffle } from 'hardhat'
 import { parseEther } from '@ethersproject/units'
-import { BigNumber } from '@ethersproject/bignumber'
 
 use(solidity)
 use(jestSnapshotPlugin())

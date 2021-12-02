@@ -18,7 +18,7 @@ export default {
       verbose: true,
     },
     test: {
-      tasks: [{ command: 'test', params: { testFiles: ['./test/core-test.ts'] } }],
+      tasks: [{ command: 'test', params: { testFiles: ['./test/core-test.ts', './test/membership-test.ts'] } }],
       files: ['./test/**/*', './contracts/**/*'],
       verbose: true,
     },
@@ -38,7 +38,7 @@ export default {
     },
     matic: {
       url: 'https://rpc-mumbai.maticvigil.com',
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.PRIVATE_KEY || '0x000000000000'],
     },
   },
   etherscan: {
@@ -50,6 +50,8 @@ export default {
     enabled: true,
     currency: process.env.COINMARKETCAP_DEFAULT_CURRENCY,
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
+    gasPriceApi: 'https://api.polygonscan.com/api?module=proxy&action=eth_gasPrice',
+    token: 'MATIC',
   },
   solidity: {
     version: '0.8.0',
