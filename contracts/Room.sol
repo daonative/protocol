@@ -55,6 +55,7 @@ contract Room {
 
     function closeProposal(bytes32 proposalId) public {
         require(proposalId.length > 0, 'proposalId length should be higher than 0');
+        require(msg.sender == creator, 'only the room creator can close a proposal');
         require(proposals[proposalId].state == State.APPROVED, 'Only APPROVED proposals can be closed');
         proposals[proposalId].state = State.CLOSED;
         emit Close(proposalId);
