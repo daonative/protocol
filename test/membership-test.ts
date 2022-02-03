@@ -23,12 +23,15 @@ describe('Room Membership Contract', () => {
 })
 
 describe('Ability to mint an NFT', () => {
-  it('should be possible for the MINER to mint an NFT', async () => {
+  it('should be possible to mint an NFT', async () => {
     const RoomMembership = await ethers.getContractFactory('RoomMembership')
     const roomMembership = await RoomMembership.deploy()
-    const [owner, memberOne, memberTwo, memberThree] = await ethers.getSigners()
-    const roomMembershipWithMemberOne = new ethers.Contract(roomMembership.address, roomMembership.interface, owner)
-    roomMembershipWithMemberOne.safeMint(owner.address, 'test')
+    const [_, memberOne, memberTwo, memberThree] = await ethers.getSigners()
+    const roomMembershipContract = new ethers.Contract(roomMembership.address, roomMembership.interface)
+
+    await roomMembershipContract.connect(memberOne).safeMint(memberOne.address, 'daonative')
+    await roomMembershipContract.connect(memberOne).safeMint(memberOne.address, 'greendao')
+    await roomMembershipContract.connect(memberTwo).safeMint(memberTwo.address, 'daonative')
+    await roomMembershipContract.connect(memberThree).safeMint(memberThree.address, 'greendao')
   })
 })
-describe('Ability to adjust price based on counter', () => {})

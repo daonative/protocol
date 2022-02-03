@@ -4,21 +4,17 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
-import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 
-contract RoomMembership is ERC721, ERC721Enumerable, ERC721URIStorage, AccessControl {
+contract RoomMembership is ERC721, ERC721Enumerable, ERC721URIStorage {
     using Counters for Counters.Counter;
     bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');
 
     Counters.Counter private _tokenIdCounter;
 
-    constructor() ERC721('RoomMembership', 'MTK') {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        grantRole(MINTER_ROLE, msg.sender);
-    }
+    constructor() ERC721('RoomMembership', 'MEMBER') {}
 
-    function safeMint(address to, string memory uri) public onlyRole(MINTER_ROLE) {
+    function safeMint(address to, string memory uri) public {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
@@ -46,7 +42,7 @@ contract RoomMembership is ERC721, ERC721Enumerable, ERC721URIStorage, AccessCon
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721, ERC721Enumerable, AccessControl)
+        override(ERC721, ERC721Enumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

@@ -29,12 +29,12 @@ export default {
     },
 
     ropsten: {
-      url: API_URL_ROPSTEN,
-      accounts: [`0x${TEST_PRIVATE_KEY}`],
+      url: API_URL_ROPSTEN || '',
+      accounts: [TEST_PRIVATE_KEY || '0x000000000000'],
     },
     kovan: {
-      url: API_URL_KOVAN,
-      accounts: [`0x${TEST_PRIVATE_KEY}`],
+      url: API_URL_KOVAN || '',
+      accounts: [TEST_PRIVATE_KEY || '0x000000000000'],
     },
     matic: {
       url: 'https://polygon-mainnet.g.alchemy.com/v2/NEz6QL2p7xBWqTwmZF5nCCF8PL-zTE4O',
