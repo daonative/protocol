@@ -47,6 +47,7 @@ contract Collection is ERC721, ERC721URIStorage, Pausable, Ownable, ERC721Burnab
         address to,
         uint256 tokenId
     ) internal override whenNotPaused {
+        require(balanceOf(to) == 0, "Recipient already has a token");
         super._beforeTokenTransfer(from, to, tokenId);
     }
 

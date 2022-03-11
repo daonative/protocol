@@ -30,7 +30,7 @@ describe.only('Collection Contract', () => {
     expect(await collection.symbol()).to.equal(symbol)
   })
 
-  it.only('should mint with a valid invite signature', async () => {
+  it('should mint with a valid invite signature', async () => {
     const [owner] = await ethers.getSigners()
     const message = "invite-code"
     const messageHash = ethers.utils.solidityKeccak256(['string'], [message]);
@@ -49,5 +49,34 @@ describe.only('Collection Contract', () => {
     const Collection = await ethers.getContractFactory('Collection')
     const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI)
     await expect(collection.safeMint(messageHash, signature)).to.be.revertedWith('Invalid signature')
+  })
+
+  it('should not be able to mint two tokens', async () => {
+    const [owner] = await ethers.getSigners()
+    const message = "invite-code"
+    const messageHash = ethers.utils.solidityKeccak256(['string'], [message]);
+    const signature = await owner.signMessage(ethers.utils.arrayify(messageHash))
+    const Collection = await ethers.getContractFactory('Collection')
+    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI)
+    await expect(collection.safeMint(messageHash, signature)).to.emit(collection, 'Transfer')
+    await expect(collection.safeMint(messageHash, signature)).to.be.revertedWith('Recipient already has a token')
+  })
+
+  it('should not be able to mint two tokens', async () => {
+    const [owner, someoneElse] = await ethers.getSigners()
+    const message = "invite-code"
+    const messageHash = ethers.utils.solidityKeccak256(['string'], [message]);
+    const signature = await owner.signMessage(ethers.utils.arrayify(messageHash))
+    const Collection = await ethers.getContractFactory('Collection')
+    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI)
+
+    // Mint token 0 for owner
+    await expect(collection.connect(owner).safeMint(messageHash, signature)).to.emit(collection, 'Transfer')
+
+    // Mint token 1 for someoneElse
+    await expect(collection.connect(someoneElse).safeMint(messageHash, signature)).to.emit(collection, 'Transfer')
+
+    // Transfer token 0 to someoneElse
+    await expect(collection.connect(owner)['safeTransferFrom(address,address,uint256)'](owner.address, someoneElse.address, 0)).to.be.revertedWith('Recipient already has a token')
   })
 })
