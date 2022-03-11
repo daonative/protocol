@@ -16,6 +16,7 @@ contract Collection is ERC721, ERC721URIStorage, Pausable, Ownable, ERC721Burnab
     Counters.Counter private _tokenIdCounter;
     string private _uri;
     uint private _mintEndTimestamp;
+    mapping(string => uint) private _invites;
 
     constructor(
         address creator,
@@ -41,9 +42,11 @@ contract Collection is ERC721, ERC721URIStorage, Pausable, Ownable, ERC721Burnab
         _unpause();
     }
 
-    function safeMint(bytes32 inviteNonce, bytes memory signature) public {
-        require(_verify(inviteNonce, signature, owner()) == true, "Invalid signature");
+    function safeMint(string memory inviteCode, uint maxUses, bytes memory signature) public {
         require(_mintEndTimestamp == 0 || block.timestamp < _mintEndTimestamp, "Cannot mint outside of time window");
+        require(_verifySignature(inviteCode, maxUses, signature, owner()) == true, "Invalid signature");
+        require(_verifyCodeMaxUses(inviteCode, maxUses) == true, "Invalid invite code");
+        _bumpInviteCodeUsage(inviteCode);
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
@@ -59,12 +62,26 @@ contract Collection is ERC721, ERC721URIStorage, Pausable, Ownable, ERC721Burnab
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    function _verify(
-        bytes32 data,
+    function _bumpInviteCodeUsage(string memory inviteCode) internal virtual {
+        _invites[inviteCode] += 1;
+    }
+
+    function _verifyCodeMaxUses(string memory inviteCode, uint maxUses) internal virtual returns (bool) {
+        if (maxUses == 0) {
+            return true;
+        }
+        return _invites[inviteCode] < maxUses;
+    }
+
+    function _verifySignature(
+        string memory inviteCode,
+        uint maxUses,
         bytes memory signature,
         address account
     ) internal pure returns (bool) {
-        return data.toEthSignedMessageHash().recover(signature) == account;
+        bytes32 msgHash = keccak256(abi.encodePacked(inviteCode, maxUses));
+        //bytes32 signedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", msgHash));
+        return msgHash.toEthSignedMessageHash().recover(signature) == account;
     }
 
     // The following functions are overrides required by Solidity.
