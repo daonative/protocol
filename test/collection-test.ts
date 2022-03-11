@@ -1,8 +1,7 @@
 import { expect, use } from 'chai'
 import { solidity } from 'ethereum-waffle'
 import { jestSnapshotPlugin } from 'mocha-chai-jest-snapshot'
-import { ethers, waffle } from 'hardhat'
-import { parseEther } from '@ethersproject/units'
+import { ethers, network } from 'hardhat'
 
 use(solidity)
 use(jestSnapshotPlugin())
@@ -14,7 +13,7 @@ describe.only('Collection Contract', () => {
   it('should deploy the collection contract', async () => {
     const [owner] = await ethers.getSigners()
     const Collection = await ethers.getContractFactory('Collection')
-    await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI)
+    await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI, 0)
   })
 
   it('should create a collection', async () => {
@@ -22,7 +21,7 @@ describe.only('Collection Contract', () => {
     const symbol = 'DNM'
     const CollectionCreator = await ethers.getContractFactory('CollectionCreator')
     const collectionCreator = await CollectionCreator.deploy()
-    await expect(collectionCreator.createCollection(name, symbol, URI)).to.emit(collectionCreator, 'CollectionCreated')
+    await expect(collectionCreator.createCollection(name, symbol, URI, 0)).to.emit(collectionCreator, 'CollectionCreated')
     const [newRoomAddress] = await collectionCreator.getCollections()
     const Collection = await ethers.getContractFactory('Collection')
     const collection = Collection.attach(newRoomAddress)
@@ -36,7 +35,7 @@ describe.only('Collection Contract', () => {
     const messageHash = ethers.utils.solidityKeccak256(['string'], [message]);
     const signature = await owner.signMessage(ethers.utils.arrayify(messageHash))
     const Collection = await ethers.getContractFactory('Collection')
-    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI)
+    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI, 0)
     await expect(collection.safeMint(messageHash, signature)).to.emit(collection, 'Transfer')
     expect(await collection.tokenURI(0)).to.equal(URI)
   })
@@ -47,7 +46,7 @@ describe.only('Collection Contract', () => {
     const messageHash = ethers.utils.solidityKeccak256(['string'], [message]);
     const signature = await someoneElse.signMessage(ethers.utils.arrayify(messageHash))
     const Collection = await ethers.getContractFactory('Collection')
-    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI)
+    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI, 0)
     await expect(collection.safeMint(messageHash, signature)).to.be.revertedWith('Invalid signature')
   })
 
@@ -57,7 +56,7 @@ describe.only('Collection Contract', () => {
     const messageHash = ethers.utils.solidityKeccak256(['string'], [message]);
     const signature = await owner.signMessage(ethers.utils.arrayify(messageHash))
     const Collection = await ethers.getContractFactory('Collection')
-    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI)
+    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI, 0)
     await expect(collection.safeMint(messageHash, signature)).to.emit(collection, 'Transfer')
     await expect(collection.safeMint(messageHash, signature)).to.be.revertedWith('Recipient already has a token')
   })
@@ -68,7 +67,7 @@ describe.only('Collection Contract', () => {
     const messageHash = ethers.utils.solidityKeccak256(['string'], [message]);
     const signature = await owner.signMessage(ethers.utils.arrayify(messageHash))
     const Collection = await ethers.getContractFactory('Collection')
-    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI)
+    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI, 0)
 
     // Mint token 0 for owner
     await expect(collection.connect(owner).safeMint(messageHash, signature)).to.emit(collection, 'Transfer')
@@ -78,5 +77,32 @@ describe.only('Collection Contract', () => {
 
     // Transfer token 0 to someoneElse
     await expect(collection.connect(owner)['safeTransferFrom(address,address,uint256)'](owner.address, someoneElse.address, 0)).to.be.revertedWith('Recipient already has a token')
+  })
+
+  it('should only allow minting in a set time window', async () => {
+    const [owner, someoneElse] = await ethers.getSigners()
+    const message = "invite-code"
+    const messageHash = ethers.utils.solidityKeccak256(['string'], [message]);
+    const signature = await owner.signMessage(ethers.utils.arrayify(messageHash))
+
+    // Determine a mint time window (100 seconds after now)
+    const lastBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+    const mintEndTimestamp = lastBlock.timestamp + 1000
+
+    const Collection = await ethers.getContractFactory('Collection')
+    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI, mintEndTimestamp)
+
+    // Check timewindow end
+    expect(await collection.getMintEndTimestamp() === mintEndTimestamp)
+
+    // Mint a token
+    await expect(collection.safeMint(messageHash, signature)).to.emit(collection, 'Transfer')
+
+    // Set the next block timestamp to exceed the mint time window
+    await network.provider.send("evm_setNextBlockTimestamp", [mintEndTimestamp + 1])
+    await network.provider.send("evm_mine")
+
+    // Try to mint a token outside of the time window
+    await expect(collection.connect(someoneElse).safeMint(messageHash, signature)).to.be.revertedWith('Cannot mint outside of time window')
   })
 })

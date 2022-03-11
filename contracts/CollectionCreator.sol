@@ -6,8 +6,13 @@ contract CollectionCreator {
     Collection[] public allCollections;
     event CollectionCreated(address indexed newCollection);
 
-    function createCollection(string memory name, string memory symbol, string memory uri) external returns (Collection) {
-        Collection newCollection = new Collection(msg.sender, name, symbol, uri);
+    function createCollection(
+        string memory name,
+        string memory symbol,
+        string memory uri,
+        uint mintEndTimestamp
+    ) external returns (Collection) {
+        Collection newCollection = new Collection(msg.sender, name, symbol, uri, mintEndTimestamp);
         emit CollectionCreated(address(newCollection));
         allCollections.push(newCollection);
         return newCollection;

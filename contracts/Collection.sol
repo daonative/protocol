@@ -15,15 +15,22 @@ contract Collection is ERC721, ERC721URIStorage, Pausable, Ownable, ERC721Burnab
 
     Counters.Counter private _tokenIdCounter;
     string private _uri;
+    uint private _mintEndTimestamp;
 
     constructor(
         address creator,
         string memory name,
         string memory symbol,
-        string memory uri
+        string memory uri,
+        uint mintEndTimestamp
     ) ERC721(name, symbol) {
         transferOwnership(creator);
         _uri = uri;
+        _mintEndTimestamp = mintEndTimestamp;
+    }
+
+    function getMintEndTimestamp() public view returns (uint) {
+        return _mintEndTimestamp;
     }
 
     function pause() public onlyOwner {
@@ -36,6 +43,7 @@ contract Collection is ERC721, ERC721URIStorage, Pausable, Ownable, ERC721Burnab
 
     function safeMint(bytes32 inviteNonce, bytes memory signature) public {
         require(_verify(inviteNonce, signature, owner()) == true, "Invalid signature");
+        require(_mintEndTimestamp == 0 || block.timestamp < _mintEndTimestamp, "Cannot mint outside of time window");
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
