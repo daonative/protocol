@@ -106,8 +106,8 @@ describe.only('Collection Contract', () => {
     await expect(collection.connect(someoneElse).safeMint(inviteCode, 0, signature)).to.be.revertedWith('Cannot mint outside of time window')
   })
 
-  it.only('should be able to mint within invite code limit', async () => {
-    const [owner, someoneElse, stranger] = await ethers.getSigners()
+  it('should be able to mint within invite code limit', async () => {
+    const [owner, someoneElse] = await ethers.getSigners()
     const inviteCode = "invite-code"
     const messageHash = ethers.utils.solidityKeccak256(['string', 'uint'], [inviteCode, 2]);
     const signature = await owner.signMessage(ethers.utils.arrayify(messageHash))
@@ -124,4 +124,20 @@ describe.only('Collection Contract', () => {
     await expect(collection.connect(someoneElse).safeMint(inviteCode, 2, signature)).to.be.revertedWith('Invalid invite code')
   })
 
+  it('should not be able to mint with a limited invite code that tunred unlimited', async () => {
+    const [owner, someoneElse] = await ethers.getSigners()
+    const inviteCode = "invite-code"
+    const Collection = await ethers.getContractFactory('Collection')
+    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI, 0)
+
+    // Mint token with limited invite code
+    const limitedMessageHash = ethers.utils.solidityKeccak256(['string', 'uint'], [inviteCode, 2]);
+    const limitedSignature = await owner.signMessage(ethers.utils.arrayify(limitedMessageHash))
+    await expect(collection.connect(owner).safeMint(inviteCode, 2, limitedSignature)).to.emit(collection, 'Transfer')
+
+    // Mint token with limited invite code turned unlimited
+    const unlimitedMessageHash = ethers.utils.solidityKeccak256(['string', 'uint'], [inviteCode, 0]);
+    const unlimitedSignature = await owner.signMessage(ethers.utils.arrayify(unlimitedMessageHash))
+    await expect(collection.connect(someoneElse).safeMint(inviteCode, 0, unlimitedSignature)).to.be.revertedWith('Invalid invite code')
+  })
 })
