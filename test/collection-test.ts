@@ -38,6 +38,7 @@ describe.only('Collection Contract', () => {
     const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI, 0, 0)
     await expect(collection.safeMint(inviteCode, 0, signature)).to.emit(collection, 'Transfer')
     expect(await collection.tokenURI(0)).to.equal(URI)
+    expect(await collection.collectionURI()).to.equal(URI)
   })
 
   it('should not mint with an invalid invite signature', async () => {
@@ -149,6 +150,9 @@ describe.only('Collection Contract', () => {
     const inviteCode = "invite-code"
     const messageHash = ethers.utils.solidityKeccak256(['string', 'uint'], [inviteCode, 0]);
     const signature = await owner.signMessage(ethers.utils.arrayify(messageHash))
+
+    // Get max supply
+    expect(await collection.maxSupply()).to.equal(2)
 
     // Mint token 0 for owner
     await expect(collection.connect(owner).safeMint(inviteCode, 0, signature)).to.emit(collection, 'Transfer')

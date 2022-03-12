@@ -10,7 +10,7 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 
-contract Collection is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ownable, ERC721Burnable {
+contract Collection is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable {
     using Counters for Counters.Counter;
     using ECDSA for bytes32;
 
@@ -26,12 +26,12 @@ contract Collection is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Own
         string memory symbol,
         string memory uri,
         uint256 mintEndTimestamp,
-        uint256 maxSupply
+        uint256 maxTokenSupply
     ) ERC721(name, symbol) {
         transferOwnership(creator);
         _uri = uri;
         _mintEndTimestamp = mintEndTimestamp;
-        _maxSupply = maxSupply;
+        _maxSupply = maxTokenSupply;
     }
 
     function getMintEndTimestamp() public view returns (uint256) {
@@ -59,7 +59,6 @@ contract Collection is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Own
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
-        _setTokenURI(tokenId, _uri);
 
         if (inviteMaxUses != 0) {
             _bumpInviteCodeUsage(inviteCode);
@@ -92,6 +91,14 @@ contract Collection is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Own
         return _invites[inviteCode] < inviteMaxUses;
     }
 
+    function collectionURI() public view returns (string memory) {
+        return _uri;
+    }
+
+    function maxSupply() public view returns (uint256) {
+        return _maxSupply;
+    }
+
     function _verifySignature(
         string memory inviteCode,
         uint256 maxUses,
@@ -99,17 +106,12 @@ contract Collection is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Own
         address account
     ) internal pure returns (bool) {
         bytes32 msgHash = keccak256(abi.encodePacked(inviteCode, maxUses));
-        //bytes32 signedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", msgHash));
         return msgHash.toEthSignedMessageHash().recover(signature) == account;
     }
 
-    // The following functions are overrides required by Solidity.
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
-        super._burn(tokenId);
-    }
-
-    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
-        return super.tokenURI(tokenId);
+    function tokenURI(uint256 tokenId) public view override(ERC721) returns (string memory) {
+        require(_exists(tokenId), "ERC721URIStorage: URI query for nonexistent token");
+        return _uri;
     }
 
     function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable) returns (bool) {
