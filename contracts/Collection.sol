@@ -23,7 +23,8 @@ contract Collection is ERC721, ERC721URIStorage, Pausable, Ownable, ERC721Burnab
         string memory name,
         string memory symbol,
         string memory uri,
-        uint256 mintEndTimestamp
+        uint256 mintEndTimestamp,
+        uint mintMax
     ) ERC721(name, symbol) {
         transferOwnership(creator);
         _uri = uri;
