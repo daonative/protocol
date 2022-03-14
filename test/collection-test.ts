@@ -163,4 +163,28 @@ describe.only('Collection Contract', () => {
     // Try to mint a third token with the same invite code
     await expect(collection.connect(somebody).safeMint(inviteCode, 0, signature)).to.be.revertedWith('Max supply exceeded')
   })
+
+  it('should not be able to mint or transfer after pausing', async () => {
+    const [owner, someoneElse, somebody] = await ethers.getSigners()
+    const inviteCode = "invite-code"
+    const messageHash = ethers.utils.solidityKeccak256(['string', 'uint'], [inviteCode, 0]);
+    const signature = await owner.signMessage(ethers.utils.arrayify(messageHash))
+    const Collection = await ethers.getContractFactory('Collection')
+    const collection = await Collection.deploy(owner.address, 'DAOnative Membership', 'DNM', URI, 0, 0)
+
+    // Mint token 0 for owner
+    await expect(collection.connect(owner).safeMint(inviteCode, 0, signature)).to.emit(collection, 'Transfer')
+
+    // Mint token 1 for someoneElse
+    await expect(collection.connect(someoneElse).safeMint(inviteCode, 0, signature)).to.emit(collection, 'Transfer')
+
+    // Pause contract
+    await collection.connect(owner).pause()
+
+    // Minting should not work after pausing
+    await expect(collection.connect(somebody).safeMint(inviteCode, 0, signature)).to.be.revertedWith('Pausable: paused')
+
+    // Transfer should not work after pausing
+    await expect(collection.connect(owner)['safeTransferFrom(address,address,uint256)'](owner.address, somebody.address, 0)).to.be.revertedWith('Pausable: paused')
+  })
 })
