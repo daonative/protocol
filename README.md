@@ -4,22 +4,31 @@ Welcome to the DAOnative repo
 
 Right now we just released a naive implementation of how the contracts will work. But, we plan on reducing the costs of deploying.
 
-## Warning
+
+## Types of Smart Contracts
+
+1. Rooms -> Rooms Smartcontract are dead simple treasury that allow people to fund it and request funds from it
+2. Collections -> Collection are used to create your own NFT DAO membership
+
+
+## Rooms
+
+### Warning
 
 This is still an alpha version which will evolve significantly before the mainnet release.
 
-## Terminology
+### Terminology
 
 - room: a treasury to help you fund content
 - proposal: a way to request funds from your treasury
 
-## Roles
+### Roles
 
 - contributor: someone requesting money from the treasury
 - sponsor: a person who funds the treasury
 - creator: `msg.sender` that created the treasury
 
-## Introduction
+### Introduction
 
 Using DAOnative smart contracts, sponsors can:
 
@@ -34,13 +43,14 @@ Using DAOnative contracts, contributors can:
 
 ## Roadmap
 
-1. release source code naive implentation of smart coontracts
-2. reduce gas cost by using [open zeppelin clones](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Clones)
-3. release testnet
-4. release testnet dApp 
-5. release mainnet ⬅️ Currently live on polygon
-6. funding a treasury using `RoomMembership` NFTs
-7. funding using erc20 support
+- [x] release source code naive implentation of smart coontracts
+- [ ] reduce gas cost by using [open zeppelin clones](https://docs.openzeppelin.com/contracts/4.x/api/proxy#Clones)
+- [x] release tesnet
+- [x] release mainnet polygon
+- [x] release mainnet eth
+- [ ] funding a treasury using `RoomMembership` NFTs
+- [ ] funding using erc20 support
+
 
 ## Development
 
