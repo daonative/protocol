@@ -40,6 +40,7 @@
     "ganache": "ganache-cli",
     "compile": "hardhat compile",
     "deploy:local": "hardhat run  scripts/deploy.js",
+    "slither": "slither .",
     "test": "hardhat test",
     "deploy:ropsten": "hardhat run --network ropsten  scripts/deploy.js",
     "deploy:kovan": "hardhat run --network kovan  scripts/deploy.js",

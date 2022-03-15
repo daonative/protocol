@@ -1,5 +1,5 @@
 tasks:
-  - init: yarn install
+  - init: pip3 install slither-analyzer && yarn install
 
 vscode:
   extensions:
