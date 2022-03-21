@@ -16,6 +16,7 @@ contract Collection is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnab
 
     Counters.Counter private _tokenIdCounter;
     string private _uri;
+    bool private _oneTokenPerWallet;
     uint256 private _mintEndTimestamp;
     uint256 private _maxSupply;
     mapping(string => uint256) private _invites;
@@ -25,6 +26,7 @@ contract Collection is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnab
         string memory name,
         string memory symbol,
         string memory uri,
+        bool oneTokenPerWallet,
         uint256 mintEndTimestamp,
         uint256 maxTokenSupply
     ) ERC721(name, symbol) {
@@ -32,6 +34,7 @@ contract Collection is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnab
         _uri = uri;
         _mintEndTimestamp = mintEndTimestamp;
         _maxSupply = maxTokenSupply;
+        _oneTokenPerWallet = oneTokenPerWallet;
     }
 
     function getMintEndTimestamp() public view returns (uint256) {
@@ -70,8 +73,16 @@ contract Collection is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnab
         address to,
         uint256 tokenId
     ) internal override(ERC721, ERC721Enumerable) whenNotPaused {
-        require(balanceOf(to) == 0, 'Recipient already has a token');
+        require(_verifyTokenAllowancePerWallet(to), 'Recipient already has a token');
         super._beforeTokenTransfer(from, to, tokenId);
+    }
+
+    function _verifyTokenAllowancePerWallet(address recipient) internal virtual returns (bool) {
+        if (_oneTokenPerWallet == false) {
+            return true;
+        }
+
+        return balanceOf(recipient) == 0;
     }
 
     function _bumpInviteCodeUsage(string memory inviteCode) internal virtual {
